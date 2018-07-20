@@ -6,21 +6,21 @@ namespace WCGL.RemoteAssetManager
 {
     class ImportDirectory
     {
-        static void CopyDirectory(string src, string dst)
+        static void CopyDirectory(DirectoryInfo src, DirectoryInfo dst)
         {
-            Directory.CreateDirectory(dst);
+            dst.Create();
+            string dstPath = dst.ToString();
 
-            foreach (string srcFile in Directory.GetFiles(src))
+            foreach (var srcFile in src.GetFiles())
             {
-                string fileName = Path.GetFileName(srcFile);
-                string dstFile = Path.Combine(dst, fileName);
-                File.Copy(srcFile, dstFile);
+                string dstFilePath = Path.Combine(dstPath, srcFile.Name);
+                srcFile.CopyTo(dstFilePath);
             }
 
-            foreach (string srcChild in Directory.GetDirectories(src))
+            foreach (var srcChild in src.GetDirectories())
             {
-                string childName = Path.GetFileName(srcChild);
-                string dstChild = Path.Combine(dst, childName);
+                string dstChildPath = Path.Combine(dstPath, srcChild.Name);
+                var dstChild = new DirectoryInfo(dstChildPath);
                 CopyDirectory(srcChild, dstChild);
             }
         }
@@ -71,7 +71,9 @@ namespace WCGL.RemoteAssetManager
                 return;
             }
 
-            CopyDirectory(remoteSrcDir, localDstDir);
+            var src = new DirectoryInfo(remoteSrcDir);
+            var dst = new DirectoryInfo(localDstDir);
+            CopyDirectory(src, dst);
             AssetDatabase.ImportAsset(localDstDir, ImportAssetOptions.ImportRecursive);
 
             var obj = AssetDatabase.LoadAssetAtPath<Object>(localDstDir);
