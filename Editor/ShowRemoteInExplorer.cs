@@ -1,5 +1,4 @@
 ﻿using UnityEditor;
-using System.IO;
 using System.Diagnostics;
 
 namespace WCGL.RemoteAssetManager
@@ -11,17 +10,14 @@ namespace WCGL.RemoteAssetManager
             var guids = Selection.assetGUIDs;
             string localSelectedPath = AssetDatabase.GUIDToAssetPath(guids[0]);
 
-            string localRoot = Util.GetLocalRootDir(localSelectedPath);
-            if (localRoot == null)
+            var rootInfo = RootInfo.SearchRoot(localSelectedPath);
+            if (rootInfo == null)
             {
                 EditorUtility.DisplayDialog("Error", "Select directory managed by Remote Asset Manager.", "OK");
                 return;
             }
 
-            string settingFile = Path.Combine(localRoot, "RemoteAssetManager.txt");
-            string remoteRoot = File.ReadAllLines(settingFile)[0];
-
-            string remoteSelectedPath = localSelectedPath.Replace(localRoot, remoteRoot);
+            string remoteSelectedPath = rootInfo.getRemotePath(localSelectedPath);
             remoteSelectedPath = remoteSelectedPath.Replace('/', '\\');
             Process.Start("explorer.exe", "/select," + remoteSelectedPath);
         }

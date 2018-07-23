@@ -30,35 +30,31 @@ namespace WCGL.RemoteAssetManager
             var guids = Selection.assetGUIDs;
             string localOpenedDir = AssetDatabase.GUIDToAssetPath(guids[0]);
 
-            string localRoot = Util.GetLocalRootDir(localOpenedDir);
-            if (localRoot == null)
+            var rootInfo = RootInfo.SearchRoot(localOpenedDir);
+            if (rootInfo == null)
             {
                 EditorUtility.DisplayDialog("Error", "Select directory managed by Remote Asset Manager.", "OK");
                 return;
             }
 
-            string settingFile = Path.Combine(localRoot, "RemoteAssetManager.txt");
-            string remoteRoot = File.ReadAllLines(settingFile)[0];
-
-            string remoteOpenedDir = localOpenedDir.Replace(localRoot, remoteRoot);
-
+            string remoteOpenedDir = rootInfo.getRemotePath(localOpenedDir);
             string remoteSrcDir = EditorUtility.OpenFolderPanel("Import Directory", remoteOpenedDir, "");
             if (remoteSrcDir == "") return;
 
-            if (remoteSrcDir.StartsWith(remoteRoot) == false)
+            var src = new DirectoryInfo(remoteSrcDir);
+            if (src.ToString().StartsWith(rootInfo.RemoteRoot) == false)
             {
-                EditorUtility.DisplayDialog("Error", "Select directory under of " + remoteRoot, "OK");
+                EditorUtility.DisplayDialog("Error", "Select directory under of " + rootInfo.RemoteRoot, "OK");
                 return;
             }
 
-            string localDstDir = remoteSrcDir.Replace(remoteRoot, localRoot);
+            string localDstDir = rootInfo.getRemotePath(remoteSrcDir);
             if (Directory.Exists(localDstDir))
             {
                 EditorUtility.DisplayDialog("Error", localDstDir + " is already exists.", "OK");
                 return;
             }
 
-            var src = new DirectoryInfo(remoteSrcDir);
             var dst = new DirectoryInfo(localDstDir);
             CopyDirectory(src, dst);
             AssetDatabase.ImportAsset(localDstDir, ImportAssetOptions.ImportRecursive);
