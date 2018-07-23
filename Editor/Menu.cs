@@ -13,6 +13,13 @@ namespace WCGL.RemoteAssetManager
         }
 
         [MenuItem("Assets/Remote Asset Manager")]
+        [MenuItem("Assets/Remote Asset Manager/Show Remote in Explorer", false, 80)]
+        static void ShowRemoteInExplorer_()
+        {
+            ShowRemoteInExplorer.DoIt();
+        }
+
+        [MenuItem("Assets/Remote Asset Manager")]
         [MenuItem("Assets/Remote Asset Manager/Init Root", false, 100)]
         static void CreateRoot_()
         {

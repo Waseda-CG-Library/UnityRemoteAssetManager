@@ -25,25 +25,12 @@ namespace WCGL.RemoteAssetManager
             }
         }
 
-        static string GetLocalRootDir(string selectedDir)
-        {
-            string dir = selectedDir;
-            while (dir != "Assets")
-            {
-                string settingFile = Path.Combine(dir, "RemoteAssetManager.txt");
-                if (File.Exists(settingFile)) return dir;
-                dir = Directory.GetParent(dir).ToString();
-            }
-
-            return null;
-        }
-
         static public void DoIt()
         {
             var guids = Selection.assetGUIDs;
             string localOpenedDir = AssetDatabase.GUIDToAssetPath(guids[0]);
 
-            string localRoot = GetLocalRootDir(localOpenedDir);
+            string localRoot = Util.GetLocalRootDir(localOpenedDir);
             if (localRoot == null)
             {
                 EditorUtility.DisplayDialog("Error", "Select directory managed by Remote Asset Manager.", "OK");
